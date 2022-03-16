@@ -16,18 +16,15 @@ export const update: Handler = async (event, context) => {
     };
   }
 
-  const params = {
+  const params: DynamoDB.DocumentClient.UpdateItemInput = {
     TableName: process.env.DYNAMODB_TABLE as string,
     Key: {
       id: event.pathParameters.id,
     },
-    ExpressionAttributeNames: {
-      "#content": "content",
-    },
     ExpressionAttributeValues: {
       ":content": data.content,
     },
-    UpdateExpression: "SET #content = :content",
+    UpdateExpression: "SET content = :content",
     ReturnValues: "ALL_NEW",
   };
 
@@ -41,7 +38,7 @@ export const update: Handler = async (event, context) => {
     return {
       statusCode: 500,
       headers: { "Content-Type": "text/plain" },
-      body: `Couldn't fetch the todo item. Error: ${e}`,
+      body: `Couldn't fetch the post item. Error: ${e}`,
     };
   }
 };

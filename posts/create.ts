@@ -29,7 +29,7 @@ export const create: Handler = async (event, context) => {
     const res = await dynamoDb
       .get({
         TableName: process.env.DYNAMODB_TABLE as string,
-        Key: { id: params.Item.id, createdAt: params.Item.createdAt },
+        Key: { id: params.Item.id },
       })
       .promise();
 
