@@ -1,0 +1,108 @@
+service: ivilorett-api
+frameworkVersion: '3'
+
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  environment:
+    DYNAMODB_TABLE: ${self:service}-posts-${sls:stage}
+  httpApi:
+    cors: true
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource: "arn:aws:dynamodb:${aws:region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+
+functions:
+  create:
+    handler: posts/create.create
+    events:
+      - httpApi:
+          path: /posts
+          method: post
+
+  list:
+    handler: posts/list.list
+    events:
+      - httpApi:
+          path: /posts
+          method: get
+
+  get:
+    handler: posts/get.get
+    events:
+      - httpApi:
+          path: /posts/{id}
+          method: get
+
+  update:
+    handler: posts/update.update
+    events:
+      - httpApi:
+          path: /posts/{id}
+          method: put
+
+resources:
+  Resources:
+    PostsDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+          -
+            AttributeName: likes
+            AttributeType: N
+          -
+            AttributeName: userId
+            AttributeType: S
+          -
+            AttributeName: createdAt
+            AttributeType: N
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+          -
+            AttributeName: createdAt
+            KeyType: RANGE
+        GlobalSecondaryIndexes:
+          -
+            IndexName: postLikeIndex
+            KeySchema:
+              -
+                AttributeName: id
+                KeyType: HASH
+              -
+                AttributeName: likes
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          -
+            IndexName: postUserIndex
+            KeySchema:
+              -
+                AttributeName: userId
+                KeyType: HASH
+              -
+                AttributeName: createdAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-offline
