@@ -1,12 +1,16 @@
 ## Connecting to MongoDB Atlas
 
-Install packages:
+### Configure credentials
+
+Put `credentials.js` inside folder `mongodb-example/`
+
+### Install packages
 
 ```
 npm install --save
 ```
 
-Run:
+### Run
 ```
 node mongodb-example/example.js
 ```
